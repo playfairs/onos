@@ -33,7 +33,7 @@ set timeout=0
 set default=0
 
 menuentry 'ONoS development image' {
-    linux /boot/vmlinuz console=ttyS0,115200 rdinit=/init
+    linux /boot/vmlinuz console=tty0 rdinit=/init
     initrd /boot/onos-initramfs.cpio.gz
 }
 GRUB
