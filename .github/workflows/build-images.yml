@@ -81,6 +81,15 @@ jobs:
             build/image/onos-initramfs.cpio.gz \
             build/image/onos.img
 
+      - name: Tag successful dev build
+        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        run: |
+          tag="dev-ci-${{ github.run_number }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "$tag" "$GITHUB_SHA"
+          git push origin "refs/tags/$tag"
+
       - name: Inspect generated images
         if: always()
         run: |
