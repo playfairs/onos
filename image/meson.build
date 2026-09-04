@@ -42,6 +42,8 @@ custom_target(
 		'@INPUT@',
 		'@OUTPUT@',
 	],
+	depend_files: files('../tools/make-iso.sh'),
+	build_always_stale: true,
 )
 
 message('ONoS image: target registered; ISO creation requires Linux, GRUB, and ONOS_KERNEL')
