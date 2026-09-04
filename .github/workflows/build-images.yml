@@ -81,7 +81,14 @@ jobs:
             build/image/onos-initramfs.cpio.gz \
             build/image/onos.img
 
+      - name: Inspect generated images
+        if: always()
+        run: |
+          echo "Generated image directory:"
+          ls -lah build/image || true
+
       - name: Upload ISO and IMG artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: onos-images-${{ github.ref_name }}
@@ -89,3 +96,29 @@ jobs:
           path: |
             build/image/onos.iso
             build/image/onos.img
+
+  release:
+    name: Create ONoS release
+    needs: build-images
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download ONoS image artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: onos-images-${{ github.ref_name }}
+          path: release
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          draft: true
+          files: |
+            release/onos.iso
+            release/onos.img
+          name: ONoS ${{ github.ref_name }}
+          fail_on_unmatched_files: true
