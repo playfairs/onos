@@ -29,7 +29,7 @@ echo "ONoS booted successfully"
 echo "This is the temporary BusyBox initramfs milestone."
 echo "Checking to make sure that the ISO is actually being changed"
 
-exec /bin/setsid /bin/cttyhack /bin/sh
+exec /bin/setsid /bin/cttyhack /bin/sh </dev/tty1 >/dev/tty1 2>&1
 INIT
 chmod 0755 "$root/init"
 
