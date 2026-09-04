@@ -3,14 +3,16 @@ name: Build ONoS images
 on:
   push:
     branches:
-      - main
-    tags:
-      - 'v*'
+      - '**'
   pull_request:
   workflow_dispatch:
+  release:
+    types:
+      - published
 
 permissions:
-  contents: read
+  contents: write
+  actions: write
 
 jobs:
   build-images:
@@ -20,6 +22,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
 
       - name: Install image tools
         run: |
@@ -49,6 +53,17 @@ jobs:
           echo "ONOS_KERNEL=$kernel" >> "$GITHUB_ENV"
           echo "using $kernel"
 
+      - name: Run build checks
+        env:
+          ONOS_BUSYBOX: /usr/bin/busybox
+        run: |
+          meson compile -C build
+          meson test -C build --print-errorlogs
+          sh -n tools/make-initramfs.sh
+          sh -n tools/make-iso.sh
+          sh -n tools/make-img.sh
+          sh -n tools/run-qemu.sh
+
       - name: Build initramfs and BIOS ISO
         env:
           ONOS_BUSYBOX: /usr/bin/busybox
@@ -63,9 +78,10 @@ jobs:
             build/image/onos.img
 
       - name: Upload ISO and IMG artifacts
+        if: github.event_name == 'release'
         uses: actions/upload-artifact@v4
         with:
-          name: onos-images-${{ github.sha }}
+          name: onos-images-${{ github.event.release.tag_name }}
           if-no-files-found: error
           path: |
             build/image/onos.iso
