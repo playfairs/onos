@@ -27,7 +27,7 @@ mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 echo "ONoS booted successfully"
 echo "This is the temporary BusyBox initramfs milestone."
 
-exec /bin/setsid /bin/cttyhack /bin/sh
+exec /bin/setsid /bin/cttyhack /bin/sh </dev/tty1 >/dev/tty1 2>&1
 INIT
 chmod 0755 "$root/init"
 
