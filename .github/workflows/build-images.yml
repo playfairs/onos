@@ -125,12 +125,19 @@ jobs:
           name: onos-images-${{ github.ref_name }}
           path: release
 
+      - name: Inspect release files
+        run: |
+          find release -maxdepth 2 -type f -print
+          test -f release/onos.iso
+          test -f release/onos.img
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ github.token }}
           tag_name: ${{ needs.build-images.outputs.release_tag }}
           prerelease: ${{ contains(needs.build-images.outputs.release_tag, '-') }}
-          draft: true
+          draft: false
           files: |
             release/onos.iso
             release/onos.img
