@@ -21,6 +21,9 @@ mount -t proc proc /proc 2>/dev/null || true
 mount -t sysfs sysfs /sys 2>/dev/null || true
 mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 
+/bin/busybox mknod -m 0600 /dev/console c 5 1 2>/dev/null || true
+/bin/busybox mknod -m 0620 /dev/tty1 c 4 1 2>/dev/null || true
+
 echo "ONoS booted successfully"
 echo "This is the temporary BusyBox initramfs milestone."
 
