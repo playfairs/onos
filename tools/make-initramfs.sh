@@ -12,6 +12,8 @@ output="$output_dir/$(basename "$output")"
 mkdir -p "$root/bin" "$root/dev" "$root/proc" "$root/sys"
 cp "$busybox" "$root/bin/busybox"
 ln -s busybox "$root/bin/sh"
+ln -s busybox "$root/bin/setsid"
+ln -s busybox "$root/bin/cttyhack"
 
 cat > "$root/init" <<'INIT'
 #!/bin/sh
@@ -22,7 +24,7 @@ mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 echo "ONoS booted successfully"
 echo "This is the temporary BusyBox initramfs milestone."
 
-exec /bin/sh
+exec /bin/setsid /bin/cttyhack /bin/sh
 INIT
 chmod 0755 "$root/init"
 
