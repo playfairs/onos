@@ -22,12 +22,13 @@ mount -t sysfs sysfs /sys 2>/dev/null || true
 mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 
 /bin/busybox mknod -m 0600 /dev/console c 5 1 2>/dev/null || true
+/bin/busybox mknod -m 0620 /dev/tty0 c 4 0 2>/dev/null || true
 /bin/busybox mknod -m 0620 /dev/tty1 c 4 1 2>/dev/null || true
 
 echo "ONoS booted successfully"
 echo "This is the temporary BusyBox initramfs milestone."
 
-exec /bin/setsid /bin/cttyhack /bin/sh </dev/tty1 >/dev/tty1 2>&1
+exec /bin/setsid /bin/cttyhack /bin/sh </dev/console >/dev/console 2>&1
 INIT
 chmod 0755 "$root/init"
 
