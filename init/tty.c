@@ -22,7 +22,28 @@ int onos_tty_init(struct onos_tty *tty, int fd)
 	current.c_cc[VMIN] = 1;
 	current.c_cc[VTIME] = 0;
 
-	return tcsetattr(fd, TCSANOW, &current);
+	if (tcsetattr(fd, TCSANOW, &current) != 0) {
+		return -1;
+	}
+	return onos_tty_verify(tty);
+}
+
+int onos_tty_verify(const struct onos_tty *tty)
+{
+	struct termios current;
+
+	if (!isatty(tty->fd) || tcgetattr(tty->fd, &current) != 0) {
+		return -1;
+	}
+	if ((current.c_lflag & (ICANON | ECHO | ISIG)) !=
+		(ICANON | ECHO | ISIG) || !(current.c_iflag & ICRNL) ||
+		!(current.c_oflag & (OPOST | ONLCR)) || current.c_cc[VEOF] != 0x04 ||
+		current.c_cc[VINTR] != 0x03 || current.c_cc[VMIN] != 1 ||
+		current.c_cc[VTIME] != 0) {
+		errno = EINVAL;
+		return -1;
+	}
+	return 0;
 }
 
 int onos_tty_set_foreground(const struct onos_tty *tty, pid_t process_group)

@@ -10,9 +10,17 @@
 
 int onos_prepare_root_filesystem(void)
 {
-	if (mknod("/dev/console", S_IFCHR | 0600, ONOS_MAKEDEV(5, 1)) == 0 ||
-		errno == EEXIST) {
-		return 0;
+	struct stat console;
+	const dev_t expected = ONOS_MAKEDEV(5, 1);
+
+	if (mknod("/dev/console", S_IFCHR | 0600, expected) != 0 &&
+		errno != EEXIST) {
+		return -1;
 	}
-	return -1;
+	if (stat("/dev/console", &console) != 0 || !S_ISCHR(console.st_mode) ||
+		console.st_rdev != expected) {
+		errno = ENODEV;
+		return -1;
+	}
+	return 0;
 }
