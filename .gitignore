@@ -1,0 +1,9 @@
+/build/
+/.direnv/
+result
+result-*
+
+/artifacts/
+/image/*.efi
+/image/*.img
+/image/*.iso

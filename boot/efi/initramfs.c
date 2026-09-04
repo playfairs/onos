@@ -1,0 +1,1 @@
+/* Reserved for future initramfs loading logic. */
