@@ -1,25 +1,18 @@
 sh = find_program('sh')
-busybox = run_command(
-	sh,
-	'-c',
-	'printf %s "$ONOS_BUSYBOX"',
-	check: true,
-).stdout().strip()
-
-if busybox == ''
-	error('ONOS_BUSYBOX is not set; enter the Nix development shell first')
-endif
 
 initramfs = custom_target(
 	'onos-initramfs',
+	input: [onos_init, onos_shell],
 		output: 'onos-initramfs.cpio.gz',
 		command: [
 			sh,
 			meson.project_source_root() / 'tools/make-initramfs.sh',
-			busybox,
+			'@INPUT0@',
+			'@INPUT1@',
 			'@OUTPUT@',
 		],
 		depend_files: files('../tools/make-initramfs.sh'),
+		build_by_default: true,
 )
 
 run_target(

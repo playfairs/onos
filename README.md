@@ -4,16 +4,15 @@ ONoS (One Night of Sin) is an experimental POSIX amnesic operating
 system. Its guiding principle is simple: runtime changes should disappear on
 shutdown unless the user explicitly chooses persistence.
 
-This repository is at the first boot-test stage. It contains a temporary
-BusyBox initramfs that can be booted with a Linux kernel. It does **not** yet
-contain the C `/init` in that initramfs, a custom UEFI loader, or an amnesic
-overlay filesystem.
+This repository is at the first userspace boot-test stage. It boots a static
+ONoS init and shell with an external Linux kernel. It does **not** yet contain
+a custom UEFI loader or an amnesic overlay filesystem.
 
 ### Current state
 
 - The project has a Meson build and a reproducible Nix development shell.
 - `init/` contains a small host-buildable C scaffold for the future `/init`.
-- `image/` builds a temporary BusyBox initramfs.
+- `image/` builds a native ONoS initramfs.
 - Linux hosts with GRUB can also build a BIOS bootable ISO.
 
 ### Development
@@ -32,16 +31,24 @@ meson compile -C build
 ./build/init/onos-init
 ```
 
+On macOS, configure the Linux userspace cross build explicitly:
+
+```sh
+meson setup build --cross-file cross/x86_64-linux.ini
+meson compile -C build
+```
+
 After changing Meson files, refresh an existing build directory:
 
 ```sh
 meson setup build --reconfigure
 ```
 
-The current executable only reports which init responsibilities are still
-stubs. It is not an initramfs `/init` and must not be used as PID 1 yet.
+The build produces a static x86_64 Linux `onos-init` and `onos-shell`. The
+initramfs uses `onos-init` as PID 1 and does not require BusyBox for init,
+console, TTY, session, or shell handling.
 
-Build the temporary initramfs:
+Build the initramfs:
 
 ```sh
 meson compile -C build onos-initramfs
@@ -54,7 +61,7 @@ meson compile -C build onos-image
 meson compile -C build run
 ```
 
-On macOS, provide an existing x86_64 Linux kernel and boot the same initramfs
+On macOS, provide an existing x86_64 Linux kernel and boot the initramfs
 directly with QEMU:
 
 ```sh

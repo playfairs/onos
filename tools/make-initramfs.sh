@@ -1,8 +1,9 @@
 #!/bin/sh
 set -eu
 
-busybox=$1
-output=$2
+onos_init=$1
+onos_shell=$2
+output=$3
 root=$(mktemp -d)
 trap 'rm -rf "$root"' EXIT
 mkdir -p "$(dirname "$output")"
@@ -10,32 +11,8 @@ output_dir=$(cd "$(dirname "$output")" && pwd)
 output="$output_dir/$(basename "$output")"
 
 mkdir -p "$root/bin" "$root/dev" "$root/proc" "$root/sys"
-cp "$busybox" "$root/bin/busybox"
-ln -s busybox "$root/bin/sh"
-ln -s busybox "$root/bin/setsid"
-ln -s busybox "$root/bin/cttyhack"
-
-cat > "$root/init" <<'INIT'
-#!/bin/sh
-echo "[ONOS] mounting proc"
-mount -t proc proc /proc 2>/dev/null || true
-echo "[ONOS] mounting sysfs"
-mount -t sysfs sysfs /sys 2>/dev/null || true
-echo "[ONOS] mounting devtmpfs"
-mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
-
-echo "[ONOS] configuring console"
-/bin/busybox mknod -m 0600 /dev/console c 5 1 2>/dev/null || true
-/bin/busybox mknod -m 0620 /dev/tty0 c 4 0 2>/dev/null || true
-/bin/busybox mknod -m 0620 /dev/tty1 c 4 1 2>/dev/null || true
-
-echo "ONoS booted successfully"
-echo "This is the temporary BusyBox initramfs milestone."
-echo "Checking to make sure that the ISO is actually being changed"
-echo "[ONOS] starting shell"
-
-exec /bin/setsid /bin/cttyhack /bin/sh </dev/console >/dev/console 2>&1
-INIT
-chmod 0755 "$root/init"
+cp "$onos_init" "$root/init"
+cp "$onos_shell" "$root/bin/onos-shell"
+chmod 0755 "$root/init" "$root/bin/onos-shell"
 
 (cd "$root" && find . -print | cpio -o -H newc | gzip -9 > "$output")

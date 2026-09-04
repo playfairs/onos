@@ -29,16 +29,17 @@
 						dosfstools
 						mtools
 						gdb
+						pkgs.pkgsCross.musl64.stdenv.cc
 					] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
 						pkgs.grub2
 						pkgs.pkgsCross.gnu64.linuxPackages.kernel
 					];
 
-					shellHook = pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+					shellHook = pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
+						export CC="${pkgs.pkgsCross.musl64.stdenv.cc.targetPrefix}gcc"
+						export AR="${pkgs.pkgsCross.musl64.stdenv.cc.targetPrefix}ar"
+					'' + pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
 						export ONOS_KERNEL="${pkgs.pkgsCross.gnu64.linuxPackages.kernel}/bzImage"
-						export ONOS_BUSYBOX="${pkgs.pkgsCross.gnu64.busybox.override { enableStatic = true; }}/bin/busybox"
-					'' + ''
-						export ONOS_BUSYBOX="${pkgs.pkgsCross.gnu64.busybox.override { enableStatic = true; }}/bin/busybox"
 					'';
 				};
 			});

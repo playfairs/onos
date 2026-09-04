@@ -33,7 +33,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes \
-            busybox-static \
             cpio \
             dosfstools \
             grub-common \
@@ -46,8 +45,6 @@ jobs:
             xorriso
 
       - name: Configure Meson
-        env:
-          ONOS_BUSYBOX: /usr/bin/busybox
         run: meson setup build
 
       - name: Select the runner Linux kernel
@@ -60,8 +57,6 @@ jobs:
           echo "using $readable_kernel"
 
       - name: Run build checks
-        env:
-          ONOS_BUSYBOX: /usr/bin/busybox
         run: |
           meson compile -C build
           meson test -C build --print-errorlogs
@@ -71,13 +66,9 @@ jobs:
           sh -n tools/run-qemu.sh
 
       - name: Build initramfs and BIOS ISO
-        env:
-          ONOS_BUSYBOX: /usr/bin/busybox
         run: meson compile -C build onos-image
 
       - name: Build UEFI disk image
-        env:
-          ONOS_BUSYBOX: /usr/bin/busybox
         run: |
           tools/make-img.sh \
             build/image/onos-initramfs.cpio.gz \
