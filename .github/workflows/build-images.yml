@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - '**'
+    tags:
+      - 'v*'
   pull_request:
   workflow_dispatch:
   release:
@@ -80,10 +82,9 @@ jobs:
             build/image/onos.img
 
       - name: Upload ISO and IMG artifacts
-        if: github.event_name == 'release'
         uses: actions/upload-artifact@v4
         with:
-          name: onos-images-${{ github.event.release.tag_name }}
+          name: onos-images-${{ github.ref_name }}
           if-no-files-found: error
           path: |
             build/image/onos.iso
