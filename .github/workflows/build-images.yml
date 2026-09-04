@@ -1,0 +1,72 @@
+name: Build ONoS images
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-images:
+    name: Build ISO and IMG
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install image tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            busybox-static \
+            cpio \
+            dosfstools \
+            grub-common \
+            grub-efi-amd64-bin \
+            grub-pc-bin \
+            meson \
+            mtools \
+            ninja-build \
+            qemu-utils \
+            xorriso
+
+      - name: Configure Meson
+        env:
+          ONOS_BUSYBOX: /usr/bin/busybox
+        run: meson setup build
+
+      - name: Select the runner Linux kernel
+        run: |
+          kernel=$(find /boot -maxdepth 1 -type f -name 'vmlinuz-*' | sort | tail -n 1)
+          test -n "$kernel"
+          echo "ONOS_KERNEL=$kernel" >> "$GITHUB_ENV"
+          echo "using $kernel"
+
+      - name: Build initramfs and BIOS ISO
+        env:
+          ONOS_BUSYBOX: /usr/bin/busybox
+        run: meson compile -C build onos-image
+
+      - name: Build UEFI disk image
+        env:
+          ONOS_BUSYBOX: /usr/bin/busybox
+        run: |
+          tools/make-img.sh \
+            build/image/onos-initramfs.cpio.gz \
+            build/image/onos.img
+
+      - name: Upload ISO and IMG artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: onos-images-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            build/image/onos.iso
+            build/image/onos.img
