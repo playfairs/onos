@@ -1,7 +1,5 @@
 # ONoS
 
-## English
-
 ONoS (One Night of Sin) is an experimental POSIX amnesic operating
 system. Its guiding principle is simple: runtime changes should disappear on
 shutdown unless the user explicitly chooses persistence.
