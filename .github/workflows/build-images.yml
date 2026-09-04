@@ -20,6 +20,8 @@ jobs:
   build-images:
     name: Build ISO and IMG
     runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.create-dev-tag.outputs.tag || github.ref_name }}
 
     steps:
       - name: Check out repository
@@ -82,6 +84,7 @@ jobs:
             build/image/onos.img
 
       - name: Tag successful dev build
+        id: create-dev-tag
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
         run: |
           tag="dev-ci-${{ github.run_number }}"
@@ -89,6 +92,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag "$tag" "$GITHUB_SHA"
           git push origin "refs/tags/$tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Inspect generated images
         if: always()
@@ -110,7 +114,7 @@ jobs:
     name: Create ONoS release
     needs: build-images
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'push' && github.ref == 'refs/heads/dev')
     permissions:
       contents: write
 
@@ -124,10 +128,11 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          prerelease: ${{ contains(github.ref_name, '-') }}
+          tag_name: ${{ needs.build-images.outputs.release_tag }}
+          prerelease: ${{ contains(needs.build-images.outputs.release_tag, '-') }}
           draft: true
           files: |
             release/onos.iso
             release/onos.img
-          name: ONoS ${{ github.ref_name }}
+          name: ONoS ${{ needs.build-images.outputs.release_tag }}
           fail_on_unmatched_files: true
