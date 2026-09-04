@@ -29,6 +29,7 @@ mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 
 echo "ONoS booted successfully"
 echo "This is the temporary BusyBox initramfs milestone."
+echo "Checking to make sure that the ISO is actually being changed"
 
 exec /bin/setsid /bin/getty -L 115200 tty1 linux
 INIT
