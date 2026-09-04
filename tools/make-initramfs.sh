@@ -14,8 +14,6 @@ cp "$busybox" "$root/bin/busybox"
 ln -s busybox "$root/bin/sh"
 ln -s busybox "$root/bin/setsid"
 ln -s busybox "$root/bin/cttyhack"
-ln -s busybox "$root/bin/getty"
-ln -s busybox "$root/bin/login"
 
 cat > "$root/init" <<'INIT'
 #!/bin/sh
@@ -31,7 +29,7 @@ echo "ONoS booted successfully"
 echo "This is the temporary BusyBox initramfs milestone."
 echo "Checking to make sure that the ISO is actually being changed"
 
-exec /bin/setsid /bin/getty -L 115200 tty1 linux
+exec /bin/setsid /bin/cttyhack /bin/sh
 INIT
 chmod 0755 "$root/init"
 
