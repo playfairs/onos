@@ -17,10 +17,14 @@ ln -s busybox "$root/bin/cttyhack"
 
 cat > "$root/init" <<'INIT'
 #!/bin/sh
+echo "[ONOS] mounting proc"
 mount -t proc proc /proc 2>/dev/null || true
+echo "[ONOS] mounting sysfs"
 mount -t sysfs sysfs /sys 2>/dev/null || true
+echo "[ONOS] mounting devtmpfs"
 mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 
+echo "[ONOS] configuring console"
 /bin/busybox mknod -m 0600 /dev/console c 5 1 2>/dev/null || true
 /bin/busybox mknod -m 0620 /dev/tty0 c 4 0 2>/dev/null || true
 /bin/busybox mknod -m 0620 /dev/tty1 c 4 1 2>/dev/null || true
@@ -28,8 +32,9 @@ mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 echo "ONoS booted successfully"
 echo "This is the temporary BusyBox initramfs milestone."
 echo "Checking to make sure that the ISO is actually being changed"
+echo "[ONOS] starting shell"
 
-exec /bin/setsid /bin/cttyhack /bin/sh </dev/tty1 >/dev/tty1 2>&1
+exec /bin/setsid /bin/cttyhack /bin/sh </dev/console >/dev/console 2>&1
 INIT
 chmod 0755 "$root/init"
 

@@ -19,6 +19,7 @@ initramfs = custom_target(
 			busybox,
 			'@OUTPUT@',
 		],
+		depend_files: files('../tools/make-initramfs.sh'),
 )
 
 run_target(

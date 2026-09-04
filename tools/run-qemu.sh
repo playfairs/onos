@@ -10,6 +10,8 @@ if [ -z "${ONOS_KERNEL:-}" ]; then
 	exit 1
 fi
 
+printf '%s\n' 'ONoS run: QEMU serial console is attached to this terminal (Ctrl-A, X exits).' >&2
+
 exec qemu-system-x86_64 \
 	-kernel "$ONOS_KERNEL" \
 	-initrd "$initramfs" \
