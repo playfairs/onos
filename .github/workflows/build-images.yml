@@ -50,8 +50,10 @@ jobs:
         run: |
           kernel=$(find /boot -maxdepth 1 -type f -name 'vmlinuz-*' | sort | tail -n 1)
           test -n "$kernel"
-          echo "ONOS_KERNEL=$kernel" >> "$GITHUB_ENV"
-          echo "using $kernel"
+          readable_kernel="$RUNNER_TEMP/onos-vmlinuz"
+          sudo install -m 0644 "$kernel" "$readable_kernel"
+          echo "ONOS_KERNEL=$readable_kernel" >> "$GITHUB_ENV"
+          echo "using $readable_kernel"
 
       - name: Run build checks
         env:
