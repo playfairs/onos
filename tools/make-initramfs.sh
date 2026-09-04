@@ -14,6 +14,8 @@ cp "$busybox" "$root/bin/busybox"
 ln -s busybox "$root/bin/sh"
 ln -s busybox "$root/bin/setsid"
 ln -s busybox "$root/bin/cttyhack"
+ln -s busybox "$root/bin/getty"
+ln -s busybox "$root/bin/login"
 
 cat > "$root/init" <<'INIT'
 #!/bin/sh
@@ -28,7 +30,7 @@ mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 echo "ONoS booted successfully"
 echo "This is the temporary BusyBox initramfs milestone."
 
-exec /bin/setsid /bin/cttyhack /bin/sh </dev/console >/dev/console 2>&1
+exec /bin/setsid /bin/getty -L 115200 tty1 linux
 INIT
 chmod 0755 "$root/init"
 
